@@ -1,13 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.IO;
-using System.Linq;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace MetodoAssincrono
@@ -21,19 +15,47 @@ namespace MetodoAssincrono
 
         private void btnBaixar_Click(object sender, EventArgs e)
         {
+            // forma sincrona
+
+            //var webClient = new WebClient();
+
+            //barraProgresso.Visible = true;
+            //var data = webClient.DownloadData(new Uri(txtUrl.Text.Trim()));
+            //barraProgresso.Visible = false;
+
+            //pbImagem.Visible = true;
+
+            //using (var memStream = new MemoryStream(data))
+            //{
+            //    memStream.Seek(0, SeekOrigin.Begin);
+            //    pbImagem.Image = new Bitmap(memStream);
+            //}
+
+
+            // forma assincrona
+
             var webClient = new WebClient();
 
             barraProgresso.Visible = true;
-            var data = webClient.DownloadData(new Uri(txtUrl.Text.Trim()));
-            barraProgresso.Visible = false;
 
-            pbImagem.Visible = true;
-
-            using (var memStream = new MemoryStream(data))
+            // vai entrar aqui quando estiver completado
+            // porque é assincrono
+            // exdecuta quando uma operação assincrona é concluida
+            webClient.DownloadDataCompleted += (o, args) =>
             {
-                memStream.Seek(0, SeekOrigin.Begin);
-                pbImagem.Image = new Bitmap(memStream);
-            }
+                barraProgresso.Visible = false;
+
+                pbImagem.Visible = true;
+
+                using (var memStream = new MemoryStream(args.Result))
+                {
+                    memStream.Seek(0, SeekOrigin.Begin);
+                    pbImagem.Image = new Bitmap(memStream);
+                }
+            };
+
+            webClient.DownloadDataAsync(new Uri(txtUrl.Text.Trim()));
+            
         }
     }
 }

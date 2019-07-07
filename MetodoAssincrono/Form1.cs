@@ -13,7 +13,7 @@ namespace MetodoAssincrono
             InitializeComponent();
         }
 
-        private void btnBaixar_Click(object sender, EventArgs e)
+        private async void btnBaixar_Click(object sender, EventArgs e)
         {
             // forma sincrona
 
@@ -37,25 +37,16 @@ namespace MetodoAssincrono
             var webClient = new WebClient();
 
             barraProgresso.Visible = true;
+            var data = await webClient.DownloadDataTaskAsync(new Uri(txtUrl.Text.Trim()));
 
-            // vai entrar aqui quando estiver completado
-            // porque é assincrono
-            // exdecuta quando uma operação assincrona é concluida
-            webClient.DownloadDataCompleted += (o, args) =>
+            barraProgresso.Visible = false;
+            pbImagem.Visible = true;
+
+            using (var memStream = new MemoryStream(data))
             {
-                barraProgresso.Visible = false;
-
-                pbImagem.Visible = true;
-
-                using (var memStream = new MemoryStream(args.Result))
-                {
-                    memStream.Seek(0, SeekOrigin.Begin);
-                    pbImagem.Image = new Bitmap(memStream);
-                }
-            };
-
-            webClient.DownloadDataAsync(new Uri(txtUrl.Text.Trim()));
-            
+                memStream.Seek(0, SeekOrigin.Begin);
+                pbImagem.Image = new Bitmap(memStream);
+            }
         }
     }
 }
